@@ -3,7 +3,6 @@ use strict;
 use warnings;
 use Test::More;
 use utf8;
-use Devel::NYTProf;
 
 package MyAppPK1 {
     BEGIN { $ENV{'CGI_APP_RETURN_ONLY'} = 1 }
@@ -48,17 +47,14 @@ my $out = $app->run;
 like $out, qr/#2/;
 
 $out = $app->foo(4, "rhesa");
-diag $out;
 like $out, qr/#4/;
 like $out, qr/rhesa/;
 
 $out = $app->foo(3);
-diag $out;
 like $out, qr/#3/;
 
 my $app2 = MyAppPK1->new;
 $out = $app2->foo();
-diag $out;
 like $out, qr/#1/;
 like $out, qr/person/;
 
