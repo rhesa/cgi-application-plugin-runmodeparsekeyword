@@ -9,24 +9,29 @@ CGI::Application::Plugin::RunmodeParseKeyword - Declare runmodes using Parse::Ke
 
 =cut
 
-use base 'Exporter';
 our @EXPORT = qw(runmode errormode startmode);
 use Carp qw(croak);
 use Sub::Name 'subname';
+use Data::Dumper;
 use Parse::Keyword {};
 
 sub import {
     my $caller = caller;
     my $class = shift;
     my %args = @_;
+    my $into = delete $args{into} || $caller;
     my $inv = delete $args{invocant} || '$self';
 
     Parse::Keyword->import( { runmode   => sub { my ($kw) = @_; parse_mode($kw, $inv); } } );
     Parse::Keyword->import( { errormode => sub { my ($kw) = @_; parse_mode($kw, $inv); } } );
     Parse::Keyword->import( { startmode => sub { my ($kw) = @_; parse_mode($kw, $inv); } } );
 
-    local $Exporter::ExportLevel = 1;
-    $class->SUPER::import(@EXPORT);
+    for my $e(@EXPORT) {
+        my $fn = $into . '::' . $e;
+        no strict 'refs';
+        *$fn = \&$e;
+        *$fn if 0;
+    }
 }
 
 sub runmode { @_ ? $_[0] : () }
@@ -148,7 +153,8 @@ sub parse_signature {
     my ($invocant_name) = @_;
     lex_read_space;
 
-    return unless lex_peek eq '(';
+    my @vars = ({ index => 0, name => $invocant_name });
+    return \@vars unless lex_peek eq '(';
 
     my @attr = ();
 
@@ -157,11 +163,10 @@ sub parse_signature {
 
     if (lex_peek eq ')') {
         lex_read;
-        return;
+        return \@vars;
     }
 
     my $seen_slurpy;
-    my @vars = ({ index => 0, name => $invocant_name });
     while ((my $sigil = lex_peek) ne ')') {
         my $var = {};
         die "syntax error"
@@ -496,7 +501,7 @@ You tried to install another startmode. Placeholders are filled with
 =head1 BUGS
 
 Please report any bugs or feature requests to
-C<bug-cgi-application-plugin-runmodedeclare at rt.cpan.org>, or through the web
+C<bug-cgi-application-plugin-runmodeparsekeyword at rt.cpan.org>, or through the web
 interface at
 L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=CGI-Application-Plugin-RunmodeParseKeyword>.
 I will be notified, and then you'll automatically be notified of progress on
