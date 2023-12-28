@@ -101,7 +101,7 @@ sub parse_mode {
     my $name = parse_name();
     my $sig  = parse_signature($invocant);
     my $attr = parse_attributes();
-    my $body = parse_body($sig);
+    my $body = parse_body($sig) or ($@ and die);
 
     if (defined $name) {
         my $full_name = join('::', compiling_package, $name);
