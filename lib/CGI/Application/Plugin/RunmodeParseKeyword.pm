@@ -15,6 +15,8 @@ use Sub::Name 'subname';
 use Data::Dumper;
 use Parse::Keyword {};
 
+$Carp::Internal{ (__PACKAGE__) }++;
+
 sub import {
     my $caller = caller;
     my $class = shift;
@@ -287,7 +289,9 @@ sub parse_body {
 
     lex_read_space;
 
-    if (lex_peek eq '{') {
+    my $c = lex_peek;
+    croak "syntax error: expected start of block '{' but found '$c'" unless $c eq '{';
+    {
         local $CAPRPK::{'DEFAULTS::'};
         if ($sigs) {
             lex_read;
@@ -334,9 +338,6 @@ sub parse_body {
             lex_stuff($preamble);
         }
         $body = parse_block;
-    }
-    else {
-        die "syntax error";
     }
     return $body;
 }
