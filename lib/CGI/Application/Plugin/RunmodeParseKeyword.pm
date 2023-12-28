@@ -307,16 +307,17 @@ sub parse_body {
             $preamble .= 'my (' . join(', ', @names) . ') = @_;';
 
             for my $name (@names) {
+                my $p;
                 my $s = substr($name,0,1);
                 my $n = substr($name,1);
                 if ($s eq '$') {
-                    my $p = $inv->{name} . '->param("' . $n . '")';
+                    $p = $inv->{name} . '->param("' . $n . '")';
                     $preamble .= $name . ' = ' . $p . ' unless ' . ( $s eq '$' ? 'defined ' : 'scalar ') . $name . ';';
                 }
-                my $p = $inv->{name} . '->query->' . ($s eq '@' ? 'multi_param' : 'param') . '("' . $n . '")';
+                $p = $inv->{name} . '->query->' . ($s eq '@' ? 'multi_param' : 'param') . '("' . $n . '")';
                 $preamble .= $name . ' = ' . $p . ' unless ' . ( $s eq '$' ? 'defined ' : 'scalar ') . $name . ';';
                 if ($s eq '@') {
-                    my $p = $inv->{name} . '->query->' . ($s eq '@' ? 'multi_param' : 'param') . '("' . $n . '[]")';
+                    $p = $inv->{name} . '->query->' . ($s eq '@' ? 'multi_param' : 'param') . '("' . $n . '[]")';
                     $preamble .= $name . ' = ' . $p . ' unless ' . ( $s eq '$' ? 'defined ' : 'scalar ') . $name . ';';
                 }
             }
