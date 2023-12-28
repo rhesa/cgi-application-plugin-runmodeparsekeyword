@@ -169,7 +169,7 @@ sub parse_signature {
     my $seen_slurpy;
     while ((my $sigil = lex_peek) ne ')') {
         my $var = {};
-        die "syntax error"
+        die "syntax error: expected ')' but found '$sigil'"
             unless $sigil eq '$' || $sigil eq '@' || $sigil eq '%';
         die "Can't declare parameters after a slurpy parameter"
             if $seen_slurpy;
@@ -200,8 +200,9 @@ sub parse_signature {
 
         push @vars, $var;
 
-        die "syntax error"
-            unless lex_peek eq ')' || lex_peek eq ',';
+        my $c = lex_peek;
+        die "syntax error: expected ')' or ',' but found '$c'"
+            unless $c eq ')' || $c eq ',';
 
         if (lex_peek eq ',') {
             lex_read;
